@@ -98,9 +98,9 @@ class ImapOauth2WebGuard implements Guard
         /**
          * Store the section
          */
+
         $credentials['refresh_token'] = $credentials['refresh_token'] ?? '';
         ImapOauth2Web::saveToken($credentials);
-
         return $this->authenticate($credentials);
     }
 
@@ -120,6 +120,7 @@ class ImapOauth2WebGuard implements Guard
         if (empty($credentials['access_token'])) {
             return false;
         }
+       
         $user = ImapOauth2Web::getUserProfile($credentials);
         if (empty($user)) {
             ImapOauth2Web::forgetToken();

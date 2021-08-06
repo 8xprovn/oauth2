@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
 use ImapOauth2\Auth\Guard\ImapOauth2WebGuard;
 use Firebase\JWT\JWT;
+use Illuminate\Support\Facades\Session;
 
 class ImapOauth2Service
 {
@@ -69,6 +70,11 @@ class ImapOauth2Service
      */
     protected $callbackUrl;
 
+
+    protected $googleCallbackUrl;
+
+    protected $facebookCallbackUrl;
+
     /**
      * RedirectLogout
      *
@@ -88,18 +94,29 @@ class ImapOauth2Service
     public function __construct(ClientInterface $client)
     {
         if (is_null($this->baseUrl)) {
-            $this->baseUrl = trim(env('ImapOauth2_BASE_URL'));
+            $this->baseUrl = config('imapoauth.base_oauth_url');
         }
+
         if (is_null($this->clientId)) {
-            $this->clientId = env('ImapOauth2_CLIENT_ID');
+            $this->clientId = config('imapoauth.client_id');
         }
 
         if (is_null($this->clientSecret)) {
-            $this->clientSecret = env('ImapOauth2_CLIENT_SECRET');
+            $this->clientSecret = config('imapoauth.client_secret');
         }
+
         if (is_null($this->callbackUrl)) {
             $this->callbackUrl = route('ImapOauth2.callback');
         }
+
+        if (is_null($this->googleCallbackUrl)) {
+            $this->googleCallbackUrl = route('ImapOauth2.google_callback');
+        }
+
+        if (is_null($this->facebookCallbackUrl)) {
+            $this->facebookCallbackUrl = route('ImapOauth2.facebook_callback');
+        }
+
         if (is_null($this->redirectLogout)) {
             $this->redirectLogout = Config::get('imap-web.redirect_logout');
         }
@@ -116,12 +133,13 @@ class ImapOauth2Service
      */
     public function getLoginUrl()
     {
-        $url = $this->baseUrl.'/oauth/authorize';
+
+        $url = $this->baseUrl.'/oauth/authenticate';
         $params = [
-            'scope' => '',
             'client_id' => $this->clientId,
             'response_type' => 'code',
             'redirect_uri' => $this->callbackUrl,
+            'state' => 'mystate'
         ];
 
         return $this->buildUrl($url, $params);
@@ -134,7 +152,7 @@ class ImapOauth2Service
      */
     public function getLogoutUrl()
     {
-        $url = $url = $this->baseUrl.'/oauth/logout';
+        $url = $this->baseUrl.'/oauth/logout';
 
         if (empty($this->redirectLogout)) {
             $this->redirectLogout = url('/');
@@ -152,23 +170,50 @@ class ImapOauth2Service
      */
     public function getRegisterUrl()
     {
-        $url = $this->getLoginUrl();
-        return str_replace('/auth?', '/registrations?', $url);
+        return $this->getOauthUrl($this->callbackUrl);
+
     }
+
+    public function getOauthGoogleUrl()
+    {
+        return $this->getOauthUrl($this->googleCallbackUrl, 'oauth/authenticate', 'google');
+
+    }
+
+    public function getOauthFacebookUrl()
+    {
+        return $this->getOauthUrl($this->facebookCallbackUrl, 'oauth/authenticate', 'facebook');
+
+    }
+
+    public function getGoogleUrlCallback(){
+        return $this->googleCallbackUrl;
+    }
+
+    public function getFacebookUrlCallback(){
+        return $this->facebookCallbackUrl;
+    }
+
+    
     /**
      * Get access token from Code
      *
      * @param  string $code
      * @return array
      */
-    public function getAccessToken($code)
+    public function getAccessToken($code, $callbackUrl = null)
     {
+        if(!$callbackUrl) {
+            $callbackUrl = $this->callbackUrl;
+        }
+
         $url =  $this->baseUrl.'/oauth/token';
         $params = [
             'code' => $code,
             'client_id' => $this->clientId,
+            'client_secrect' => $this->clientSecret,
             'grant_type' => 'authorization_code',
-            'redirect_uri' => $this->callbackUrl,
+            'redirect_uri' => $callbackUrl,
         ];
 
         if (! empty($this->clientSecret)) {
@@ -177,15 +222,17 @@ class ImapOauth2Service
 
         $token = [];
 
-
         try {
+
             $response = $this->httpClient->request('POST', $url, ['form_params' => $params]);
 
             if ($response->getStatusCode() === 200) {
                 $token = $response->getBody()->getContents();
                 $token = json_decode($token, true);
             }
+
         } catch (GuzzleException $e) {
+
             $this->logException($e);
         }
 
@@ -198,8 +245,11 @@ class ImapOauth2Service
      * @param  string $refreshToken
      * @return array
      */
-    public function refreshAccessToken($credentials)
+    public function refreshAccessToken($credentials, $callbackUrl)
     {
+        if(!$callbackUrl) {
+            $callbackUrl = $this->callbackUrl;
+        }
         if (empty($credentials['refresh_token'])) {
             return [];
         }
@@ -209,7 +259,7 @@ class ImapOauth2Service
             'client_id' => $this->clientId,
             'grant_type' => 'refresh_token',
             'refresh_token' => $credentials['refresh_token'],
-            'redirect_uri' => $this->callbackUrl,
+            'redirect_uri' => $callbackUrl,
         ];
 
         if (! empty($this->clientSecret)) {
@@ -353,6 +403,21 @@ class ImapOauth2Service
         setcookie(self::ImapOauth2_SESSION.'refresh_token', "", time() - 86400,'/');
         // Cookie::queue(Cookie::forget(self::ImapOauth2_SESSION.'refresh_token'));
         // Cookie::queue(Cookie::forget(self::ImapOauth2_SESSION.'access_token'));
+    }
+
+    private function getOauthUrl($callbackUrl, $partUrl = 'signup', $loginType = 'app')
+    {
+        $url = $this->baseUrl.'/'.$partUrl;
+        $params = [
+            'state' => 'mystate',
+            'client_id' => $this->clientId,
+            'grant_type'=> 'authorization_code',
+            'response_type' => 'code',
+            'redirect_uri' => $callbackUrl,
+            'login_type' => $loginType
+        ];
+
+        return $this->buildUrl($url, $params);
     }
 
     /**

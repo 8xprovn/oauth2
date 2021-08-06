@@ -25,6 +25,9 @@ class ImapOauth2ServiceProvider extends ServiceProvider
     public function boot()
     {
         // User Provider
+        $this->publishes([
+            __DIR__.'/../config/imapoauth.php' => config_path('imapoauth.php'),
+        ]);
         Auth::provider('ImapOauth2-users', function($app, array $config) {
             return new ImapOauth2WebUserProvider($config['model']);
         });
@@ -37,6 +40,8 @@ class ImapOauth2ServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/config/config.php', 'imapoauth');
+        
         // ImapOauth2 Web Guard
         Auth::extend('imap-web', function ($app, $name, array $config) {
             $provider = Auth::createUserProvider($config['provider']);
@@ -48,8 +53,14 @@ class ImapOauth2ServiceProvider extends ServiceProvider
             return $app->make(ImapOauth2Service::class);
         });
 
+        $this->app->bind('imap-guard', function($app) {
+            return $app->make(ImapOauth2WebGuard::class);
+        });
+
         // Routes
         $this->registerRoutes();
+        $this->registerGoogleRoutes();
+        $this->registerFacebookRoutes();
 
         // Middleware Group
         $this->app['router']->middlewareGroup('imap-web', [
@@ -73,7 +84,7 @@ class ImapOauth2ServiceProvider extends ServiceProvider
         $options = [
             'login' => env('ROUTE_PREFIX').'/login',
             'logout' => env('ROUTE_PREFIX').'/logout',
-            //'register' => 'auth/register',
+            'register' => env('ROUTE_PREFIX').'/register',
             'callback' => env('ROUTE_PREFIX').'/callback',
         ];
         // Register Routes
@@ -87,12 +98,46 @@ class ImapOauth2ServiceProvider extends ServiceProvider
             $router->get($options['logout'], 'ImapOauth2\Controllers\AuthController@logout')->name('ImapOauth2.logout');
         }
 
-        // if (! empty($options['register'])) {
-        //     $router->get($options['register'], 'ImapOauth2\Controllers\AuthController@register')->name('ImapOauth2.register');
-        // }
+        if (! empty($options['register'])) {
+            $router->get($options['register'], 'ImapOauth2\Controllers\AuthController@register')->name('ImapOauth2.register');
+        }
 
         if (! empty($options['callback'])) {
             $router->get($options['callback'], 'ImapOauth2\Controllers\AuthController@callback')->name('ImapOauth2.callback');
         }
+    }
+
+    /**
+     * Register the authentication google routes for ImapOauth2.
+     *
+     * @return void
+     */
+    private function registerGoogleRoutes()
+    {
+        $googleUrl = env('ROUTE_PREFIX').'/oauth/google';
+        
+        $googleUrlCallBack = env('ROUTE_PREFIX').'/oauth/google/callback';
+        // Register Routes
+        $router = $this->app->make('router');
+        $router->get($googleUrl, 'ImapOauth2\Controllers\AuthController@googleLogin')->name('ImapOauth2.google_login');
+        $router->get($googleUrlCallBack, 'ImapOauth2\Controllers\AuthController@googleCallback')->name('ImapOauth2.google_callback');
+        
+    }
+
+     /**
+     * Register the authentication facebook routes for ImapOauth2.
+     *
+     * @return void
+     */
+    private function registerFacebookRoutes()
+    {
+
+        $facebookUrl = env('ROUTE_PREFIX').'/oauth/facebook';
+        $facebookUrlCallBack = env('ROUTE_PREFIX').'/oauth/facebook/callback';
+        // Register Routes
+        $router = $this->app->make('router');
+        $router->get($facebookUrl, 'ImapOauth2\Controllers\AuthController@facebookLogin')->name('ImapOauth2.facebook_login');
+        $router->get($facebookUrlCallBack, 'ImapOauth2\Controllers\AuthController@facebookCallback')->name('ImapOauth2.facebook_callback');
+        
     }
 }
