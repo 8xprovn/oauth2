@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Config;
 use ImapOauth2\Exceptions\ImapOauth2CallbackException;
 use ImapOauth2\Models\ImapOauth2User;
 use ImapOauth2\Facades\ImapOauth2Web;
-use Illuminate\Contracts\Auth\UserProvider;
+//use Illuminate\Contracts\Auth\UserProvider;
+use ImapOauth2\Auth\ImapOauth2WebUserProvider as UserProvider;
 
 class ImapOauth2WebGuard implements Guard
 {
@@ -100,7 +101,9 @@ class ImapOauth2WebGuard implements Guard
          */
 
         $credentials['refresh_token'] = $credentials['refresh_token'] ?? '';
+
         ImapOauth2Web::saveToken($credentials);
+        
         return $this->authenticate($credentials);
     }
 
@@ -122,6 +125,7 @@ class ImapOauth2WebGuard implements Guard
         }
        
         $user = ImapOauth2Web::getUserProfile($credentials);
+
         if (empty($user)) {
             ImapOauth2Web::forgetToken();
             return false;
@@ -129,6 +133,7 @@ class ImapOauth2WebGuard implements Guard
 
         // Provide User
         $user = $this->provider->retrieveByCredentials($user);
+
         $this->setUser($user);
 
         return true;

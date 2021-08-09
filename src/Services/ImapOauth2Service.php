@@ -245,7 +245,7 @@ class ImapOauth2Service
      * @param  string $refreshToken
      * @return array
      */
-    public function refreshAccessToken($credentials, $callbackUrl)
+    public function refreshAccessToken($credentials, $callbackUrl = null)
     {
         if(!$callbackUrl) {
             $callbackUrl = $this->callbackUrl;
@@ -283,6 +283,7 @@ class ImapOauth2Service
     }
     public function getPermissionUser() {
         $userId = \Auth::id();
+
         if ($permission = session()->get(self::ImapOauth2_SESSION.'user_permission_'.$userId)){
             return $permission;
         }
@@ -307,23 +308,38 @@ class ImapOauth2Service
             $this->forgetToken();
             return [];
         }
+        
         $user =  $this->parseAccessToken($credentials['access_token']);
+
         if (!$user) {
             return [];
         }
+        
         if ($userProfile = session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['sub'])){
             return $userProfile;
         }
-        $userProfile = $this->retrieveProfile($credentials);
+        
+        
+        $userProfile = $this->retrieveProfile($credentials['access_token'], $user);
+
         if ($userProfile) {
             $userProfile['user_id'] = $user['sub'];
             session()->put(self::ImapOauth2_SESSION.'user_profile_'.$user['sub'], $userProfile);
         }
         return $userProfile;
     }
-    public function retrieveProfile($token) {
-        $response = \Http::withToken($token['access_token'])->get(env('API_MICROSERVICE_URL').'/hr/employees/me');
+    public function retrieveProfile($access_token, $user) {
+
+        $profile_url = config('imapoauth.api_microservice_url').'/v1/hr/employees/search/me';
+
+        if(config('imapoauth.profile_type') == 'crm') {
+            $profile_url = config('imapoauth.api_microservice_url').'/v1/crm/contacts/search/me';
+        }
+        
+        $response = \Http::withToken($access_token)->get($profile_url);
+
         if ($response->successful()) {
+
             return $response->json();
         }
         return false;
@@ -336,10 +352,11 @@ class ImapOauth2Service
      */
     public function parseAccessToken($token)
     {
+    
         if (! is_string($token)) {
             return [];
         }
-        $public_key = env('ImapOauth2_REALM_PUBLIC_KEY');
+        $public_key = config('imapoauth.jwt_public_key');  //env('ImapOauth2_JWT_PUBLIC_KEY');
         try {
             JWT::$leeway = 10;
             return (array)JWT::decode($token, $public_key , array('RS256'));
@@ -355,6 +372,15 @@ class ImapOauth2Service
      */
     public function retrieveToken()
     {
+        $a = array_filter([
+           
+            'access_token' => $_COOKIE[self::ImapOauth2_SESSION.'access_token'] ?? '',
+            'refresh_token' => $_COOKIE[self::ImapOauth2_SESSION.'refresh_token'] ?? '',
+        ]);
+
+        echo '<pre>retrieveToken';
+        print_r($a);
+        echo '</pre>retrieveToken';
 
         return array_filter([
            
@@ -376,10 +402,11 @@ class ImapOauth2Service
      */
     public function saveToken($credentials)
     {
+    
         //session()->put(self::ImapOauth2_SESSION.'access_token', $credentials['access_token']);
         //Cookie::queue(self::ImapOauth2_SESSION.'access_token', $credentials['access_token'], 43200);
         //Cookie::queue(self::ImapOauth2_SESSION.'refresh_token', $credentials['refresh_token'], 43200);
-
+        
         setcookie(self::ImapOauth2_SESSION.'access_token', $credentials['access_token'], time() + 21600 , '/', null , false , false);
         setcookie(self::ImapOauth2_SESSION.'refresh_token', $credentials['refresh_token'], time() + 259200 , '/', null , false , false); // 3 ngay
         
@@ -498,6 +525,7 @@ class ImapOauth2Service
      */
     protected function logException(GuzzleException $e)
     {
+
         if (empty($e->getResponse())) {
             Log::error('[ImapOauth2 Service] ' . $e->getMessage());
             return;

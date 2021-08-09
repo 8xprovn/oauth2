@@ -1,7 +1,7 @@
 <?php
 
 namespace ImapOauth2\Auth;
-
+use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
 use ImapOauth2\Models\ImapOauth2User;
@@ -20,7 +20,7 @@ class ImapOauth2WebUserProvider implements UserProvider
      *
      * @param string $model
      */
-    public function __construct($model)
+    public function __construct(\App\User $model)
     {
         $this->model = $model;
     }
@@ -33,9 +33,30 @@ class ImapOauth2WebUserProvider implements UserProvider
      */
     public function retrieveByCredentials(array $credentials)
     {
-        $class = '\\'.ltrim($this->model, '\\');
+        
+        if (
+            !array_key_exists('phone', $credentials) || 
+            (!array_key_exists('contact_id', $credentials) && 
+            !array_key_exists('employee_id', $credentials))
+        ) {
+            return null;
+        }
 
-        return new $class($credentials);
+
+        if (array_key_exists('contact_id', $credentials)) {
+            return new GenericUser([
+                'id' => $credentials['contact_id'],
+                'phone' => $credentials['phone'],
+            ]);
+        } 
+
+        return new GenericUser([
+            'id' => $credentials['employee_id'],
+            'phone' => $credentials['phone'],
+        ]);
+
+        // $class = '\\'.ltrim($this->model, '\\');
+        // return new $class($credentials);
     }
 
     /**

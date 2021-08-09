@@ -5,7 +5,6 @@ namespace ImapOauth2\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-//use ImapOauth2\Auth\Guard\ImapOauth2WebGuard;
 use ImapOauth2\Exceptions\ImapOauth2CallbackException;
 use ImapOauth2\Facades\ImapOauth2Web;
 use ImapOauth2\Facades\ImapGuard;
@@ -66,7 +65,7 @@ class AuthController extends Controller
         $code = $request->input('code');
         if (! empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code);
-            if (Auth::validate($token)) {
+            if (ImapGuard::validate($token)) {
                 $url = env('ROUTE_PREFIX') ?? '/';
                 return redirect($url);
             }
@@ -107,10 +106,11 @@ class AuthController extends Controller
        
         if (! empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code, ImapOauth2Web::getGoogleUrlCallback());
-            // if (ImapGuard::validate($token)) {
-            //     $url = env('ROUTE_PREFIX') ?? '/';
-            //     //return redirect($url);
-            // }
+            if (ImapGuard::validate($token)) {
+                $url = env('ROUTE_PREFIX') ?? '/';
+                //dd(ImapGuard::user());
+                return redirect($url);
+            }
         }
 
         //return redirect(route('ImapOauth2.logout'));
@@ -147,10 +147,10 @@ class AuthController extends Controller
         $code = $request->input('code');
         if (! empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code, ImapOauth2Web::getFacebookUrlCallback());
-            // if (Auth::validate($token)) {
-            //     $url = env('ROUTE_PREFIX') ?? '/';
-            //     return redirect($url);
-            // }
+            if (ImapGuard::validate($token)) {
+                $url = env('ROUTE_PREFIX') ?? '/';
+                return redirect($url);
+            }
         }
 
         return redirect(route('ImapOauth2.logout'));
