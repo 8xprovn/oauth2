@@ -20,7 +20,8 @@ class ImapOauth2WebUserProvider implements UserProvider
      *
      * @param string $model
      */
-    public function __construct(\App\User $model)
+
+    public function __construct(ImapOauth2User $model)
     {
         $this->model = $model;
     }
@@ -33,7 +34,7 @@ class ImapOauth2WebUserProvider implements UserProvider
      */
     public function retrieveByCredentials(array $credentials)
     {
-        
+       
         if (
             !array_key_exists('phone', $credentials) || 
             (!array_key_exists('contact_id', $credentials) && 
@@ -42,21 +43,16 @@ class ImapOauth2WebUserProvider implements UserProvider
             return null;
         }
 
-
         if (array_key_exists('contact_id', $credentials)) {
-            return new GenericUser([
-                'id' => $credentials['contact_id'],
-                'phone' => $credentials['phone'],
-            ]);
-        } 
+            $credentials['user_id'] = $credentials['contact_id']; 
+        } else {
+            $credentials['user_id'] = $credentials['employee_id']; 
+        }
 
-        return new GenericUser([
-            'id' => $credentials['employee_id'],
-            'phone' => $credentials['phone'],
-        ]);
+        return new ImapOauth2User($credentials);
 
-        // $class = '\\'.ltrim($this->model, '\\');
-        // return new $class($credentials);
+        //    $class = '\\'.ltrim($this->model, '\\');
+        //     return new $class($credentials);
     }
 
     /**
@@ -67,6 +63,11 @@ class ImapOauth2WebUserProvider implements UserProvider
      */
     public function retrieveById($identifier)
     {
+        // /dd($identifier);
+        // return new GenericUser([
+            //     'id' => $credentials['contact_id'],
+            //     'phone' => $credentials['phone'],
+            // ]);
         throw new \BadMethodCallException('Unexpected method [retrieveById] call');
     }
 

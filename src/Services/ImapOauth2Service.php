@@ -134,9 +134,10 @@ class ImapOauth2Service
     public function getLoginUrl()
     {
 
-        $url = $this->baseUrl.'/oauth/authenticate';
+        $url = $this->baseUrl.'/oauth/authenticate/';
         $params = [
             'client_id' => $this->clientId,
+            'grant_type'=> 'authorization_code',
             'response_type' => 'code',
             'redirect_uri' => $this->callbackUrl,
             'state' => 'mystate'
@@ -314,14 +315,13 @@ class ImapOauth2Service
         if (!$user) {
             return [];
         }
-        
+        //dd(session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['sub']));
         if ($userProfile = session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['sub'])){
             return $userProfile;
         }
         
         
         $userProfile = $this->retrieveProfile($credentials['access_token'], $user);
-
         if ($userProfile) {
             $userProfile['user_id'] = $user['sub'];
             session()->put(self::ImapOauth2_SESSION.'user_profile_'.$user['sub'], $userProfile);
@@ -335,7 +335,7 @@ class ImapOauth2Service
         if(config('imapoauth.profile_type') == 'crm') {
             $profile_url = config('imapoauth.api_microservice_url').'/v1/crm/contacts/search/me';
         }
-        
+
         $response = \Http::withToken($access_token)->get($profile_url);
 
         if ($response->successful()) {
@@ -372,15 +372,11 @@ class ImapOauth2Service
      */
     public function retrieveToken()
     {
-        $a = array_filter([
+        // $a = array_filter([
            
-            'access_token' => $_COOKIE[self::ImapOauth2_SESSION.'access_token'] ?? '',
-            'refresh_token' => $_COOKIE[self::ImapOauth2_SESSION.'refresh_token'] ?? '',
-        ]);
-
-        echo '<pre>retrieveToken';
-        print_r($a);
-        echo '</pre>retrieveToken';
+        //     'access_token' => $_COOKIE[self::ImapOauth2_SESSION.'access_token'] ?? '',
+        //     'refresh_token' => $_COOKIE[self::ImapOauth2_SESSION.'refresh_token'] ?? '',
+        // ]);
 
         return array_filter([
            

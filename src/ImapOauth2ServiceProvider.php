@@ -7,7 +7,8 @@ use GuzzleHttp\ClientInterface;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\ServiceProvider;
+//use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use ImapOauth2\Auth\Guard\ImapOauth2WebGuard;
 use ImapOauth2\Auth\ImapOauth2WebUserProvider;
 use ImapOauth2\Middleware\ImapOauth2Authenticated;
@@ -24,12 +25,14 @@ class ImapOauth2ServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        //$this->registerPolicies();
         // User Provider
         $this->publishes([
             __DIR__.'/../config/imapoauth.php' => config_path('imapoauth.php'),
         ]);
         Auth::provider('ImapOauth2-users', function($app, array $config) {
-            return new ImapOauth2WebUserProvider($config['model']);
+            //return new ImapOauth2WebUserProvider($config['model']);
+            return new ImapOauth2WebUserProvider(new ImapOauth2User([]));
         });
     }
 

@@ -57,7 +57,18 @@ class ImapOauth2WebGuard implements Guard
      */
     public function user()
     {
-        return $this->user ?: $this->authenticate();
+        if (!is_null($this->user)) {
+            return $this->user;
+        }
+
+        $authen = $this->authenticate();
+
+        if($authen) {
+            return $this->user;
+        }
+        
+        return null; 
+        //return $this->user ?: $this->authenticate();
     }
 
     /**
@@ -66,7 +77,7 @@ class ImapOauth2WebGuard implements Guard
      * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
      * @return void
      */
-    public function setUser(?Authenticatable $user)
+    public function setUser(Authenticatable $user)
     {
         $this->user = $user;
     }
@@ -120,12 +131,12 @@ class ImapOauth2WebGuard implements Guard
         if (!$credentials) {
             $credentials = ImapOauth2Web::retrieveToken();    
         }
+
         if (empty($credentials['access_token'])) {
             return false;
         }
        
         $user = ImapOauth2Web::getUserProfile($credentials);
-
         if (empty($user)) {
             ImapOauth2Web::forgetToken();
             return false;

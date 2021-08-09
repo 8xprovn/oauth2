@@ -14,14 +14,12 @@ class ImapOauth2User implements Authenticatable
      */
     protected $fillable = [
         'user_id',
-        'name',
         'first_name',
         'last_name',
+        'fullname',
+        'birth_date',
         'email',
-        'employee_id',
-        'branch_id',
-        'branch_city_code',
-        'department_id'
+        'phone'
     ];
 
     /**
@@ -36,8 +34,11 @@ class ImapOauth2User implements Authenticatable
      *
      * @param array $profile ImapOauth2 user info
      */
-    public function __construct(array $profile)
+    public function __construct(array $profile = [])
     {
+        if(count($profile) === 0) {
+            return null;
+        }
         foreach ($profile as $key => $value) {
             if (in_array($key, $this->fillable)) {
                 $this->attributes[ $key ] = $value;

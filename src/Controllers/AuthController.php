@@ -106,9 +106,11 @@ class AuthController extends Controller
        
         if (! empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code, ImapOauth2Web::getGoogleUrlCallback());
+           
             if (ImapGuard::validate($token)) {
+               
                 $url = env('ROUTE_PREFIX') ?? '/';
-                //dd(ImapGuard::user());
+
                 return redirect($url);
             }
         }
