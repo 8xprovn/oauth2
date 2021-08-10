@@ -333,10 +333,9 @@ class ImapOauth2Service
     public function retrieveProfile($access_token, $user) {
 
         $profile_url = config('imapoauth.api_microservice_url').'/v1/crm/contacts/search/me';
-        
 
         $response = \Http::withToken($access_token)->get($profile_url);
-
+       
         if ($response->successful()) {
 
             return $response->json();

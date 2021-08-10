@@ -20,6 +20,6 @@ return [
   'client_id' => env('ImapOauth2_CLIENT_ID','api2'),
   'client_secret'=> env('ImapOauth2_CLIENT_SECRET','secret2'),
   'jwt_public_key'=> env('ImapOauth2_JWT_PUBLIC_KEY', JWT_PUBLIC_KEY),
-  'api_microservice_url' => env('API_MICROSERVICE_URL', 'http://staging.api-gateway.ebomb.edu.vn/v1')
+  'api_microservice_url' => env('API_MICROSERVICE_URL', 'http://staging.api-gateway.ebomb.edu.vn')
   // other options...
 ];

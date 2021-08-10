@@ -66,11 +66,11 @@ class AuthController extends Controller
 
         if (! empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code);
-           dd(ImapGuard::validate($token));
+           
   
             if (ImapGuard::validate($token)) {
                 $url = env('ROUTE_PREFIX') ?? '/';
-                dd($url);
+              
                 return redirect($url);
             }
         }
