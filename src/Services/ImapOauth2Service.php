@@ -208,6 +208,8 @@ class ImapOauth2Service
             $callbackUrl = $this->callbackUrl;
         }
 
+        // /dd($callbackUrl);
+
         $url =  $this->baseUrl.'/oauth/token';
         $params = [
             'code' => $code,
@@ -233,7 +235,7 @@ class ImapOauth2Service
             }
 
         } catch (GuzzleException $e) {
-
+       
             $this->logException($e);
         }
 
@@ -330,11 +332,8 @@ class ImapOauth2Service
     }
     public function retrieveProfile($access_token, $user) {
 
-        $profile_url = config('imapoauth.api_microservice_url').'/v1/hr/employees/search/me';
-
-        if(config('imapoauth.profile_type') == 'crm') {
-            $profile_url = config('imapoauth.api_microservice_url').'/v1/crm/contacts/search/me';
-        }
+        $profile_url = config('imapoauth.api_microservice_url').'/v1/crm/contacts/search/me';
+        
 
         $response = \Http::withToken($access_token)->get($profile_url);
 

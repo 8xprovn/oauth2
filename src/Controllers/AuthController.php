@@ -63,10 +63,14 @@ class AuthController extends Controller
         }
 
         $code = $request->input('code');
+
         if (! empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code);
+           dd(ImapGuard::validate($token));
+  
             if (ImapGuard::validate($token)) {
                 $url = env('ROUTE_PREFIX') ?? '/';
+                dd($url);
                 return redirect($url);
             }
         }
@@ -115,7 +119,7 @@ class AuthController extends Controller
             }
         }
 
-        //return redirect(route('ImapOauth2.logout'));
+        return redirect(route('ImapOauth2.logout'));
     }
 
     /**

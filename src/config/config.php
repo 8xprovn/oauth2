@@ -16,11 +16,10 @@ gO9O/0Qt/ZXrCI1F+NYSwyECAwEAAQ==
 -----END PUBLIC KEY-----
 JWT;
 return [
-  'base_oauth_url' => env('ImapOauth2_BASE_URL', 'http://localhost:3000'),
-  'client_id' => env('ImapOauth2_CLIENT_ID'),
-  'client_secret'=> env('ImapOauth2_CLIENT_SECRET'),
+  'base_oauth_url' => env('ImapOauth2_BASE_URL', 'https://oauth2.staging.f6.com.vn'),
+  'client_id' => env('ImapOauth2_CLIENT_ID','api2'),
+  'client_secret'=> env('ImapOauth2_CLIENT_SECRET','secret2'),
   'jwt_public_key'=> env('ImapOauth2_JWT_PUBLIC_KEY', JWT_PUBLIC_KEY),
-  'api_microservice_url' => env('API_MICROSERVICE_URL', 'http://staging.api-gateway.ebomb.edu.vn/v1'),
-  'profile_type' => env('PROFILE_TYPE', 'hr'), // hr || crm
+  'api_microservice_url' => env('API_MICROSERVICE_URL', 'http://staging.api-gateway.ebomb.edu.vn/v1')
   // other options...
 ];

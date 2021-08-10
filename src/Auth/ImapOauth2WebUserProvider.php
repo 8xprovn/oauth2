@@ -37,17 +37,13 @@ class ImapOauth2WebUserProvider implements UserProvider
        
         if (
             !array_key_exists('phone', $credentials) || 
-            (!array_key_exists('contact_id', $credentials) && 
-            !array_key_exists('employee_id', $credentials))
+            !array_key_exists('contact_id', $credentials) 
         ) {
             return null;
         }
 
-        if (array_key_exists('contact_id', $credentials)) {
-            $credentials['user_id'] = $credentials['contact_id']; 
-        } else {
-            $credentials['user_id'] = $credentials['employee_id']; 
-        }
+       
+        $credentials['user_id'] = $credentials['contact_id']; 
 
         return new ImapOauth2User($credentials);
 
