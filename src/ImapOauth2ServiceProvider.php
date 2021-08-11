@@ -43,7 +43,7 @@ class ImapOauth2ServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/Config/config.php', 'imapoauth');
+        $this->mergeConfigFrom(__DIR__.'/Config/Config.php', 'imapoauth');
         
         // ImapOauth2 Web Guard
         Auth::extend('imap-web', function ($app, $name, array $config) {
