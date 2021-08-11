@@ -118,8 +118,10 @@ class ImapOauth2Service
         }
 
         if (is_null($this->redirectLogout)) {
-            $this->redirectLogout = Config::get('imap-web.redirect_logout');
+            $this->redirectLogout =  route('ImapOauth2.redirect_logout');
         }
+
+       
 
         $this->httpClient = $client;
     }
@@ -155,11 +157,7 @@ class ImapOauth2Service
     {
         $url = $this->baseUrl.'/oauth/logout';
 
-        if (empty($this->redirectLogout)) {
-            $this->redirectLogout = url('/');
-        }
-        return $this->buildUrl($url, []);
-        //return $this->buildUrl($url, ['redirect_uri' => $this->redirectLogout]);
+        return $this->buildUrl($url, ['redirect_uri' => $this->redirectLogout]);
     }
 
     /**

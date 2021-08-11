@@ -89,6 +89,7 @@ class ImapOauth2ServiceProvider extends ServiceProvider
             'logout' => env('ROUTE_PREFIX').'/logout',
             'register' => env('ROUTE_PREFIX').'/register',
             'callback' => env('ROUTE_PREFIX').'/callback',
+            'redirect_logout' => env('ROUTE_PREFIX').'/redirect-logout'
         ];
         // Register Routes
         $router = $this->app->make('router');
@@ -99,6 +100,10 @@ class ImapOauth2ServiceProvider extends ServiceProvider
 
         if (! empty($options['logout'])) {
             $router->get($options['logout'], 'ImapOauth2\Controllers\AuthController@logout')->name('ImapOauth2.logout');
+        }
+
+        if (! empty($options['redirect_logout'])) {
+            $router->get($options['redirect_logout'], 'ImapOauth2\Controllers\AuthController@logoutRedirect')->name('ImapOauth2.redirect_logout');
         }
 
         if (! empty($options['register'])) {
