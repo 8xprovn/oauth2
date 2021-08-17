@@ -19,7 +19,7 @@ class ImapOauth2Service
     /**
      * The Session key for token
      */
-    const ImapOauth2_SESSION = 'imap_authen_';
+    const ImapOauth2_SESSION = 'imap_authen_user_';
 
     /**
      * ImapOauth2 URL
