@@ -27,9 +27,9 @@ class ImapOauth2ServiceProvider extends ServiceProvider
     {
         //$this->registerPolicies();
         // User Provider
-        $this->publishes([
-            __DIR__.'/../config/imapoauth.php' => config_path('imapoauth.php'),
-        ]);
+        // $this->publishes([
+        //     __DIR__.'/../config/imapoauth.php' => config_path('imapoauth.php'),
+        // ]);
         Auth::provider('ImapOauth2-users', function($app, array $config) {
             //return new ImapOauth2WebUserProvider($config['model']);
             return new ImapOauth2WebUserProvider(new ImapOauth2User([]));
@@ -43,7 +43,7 @@ class ImapOauth2ServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/config/config.php', 'imapoauth');
+        $this->mergeConfigFrom(__DIR__.'/Config/Config.php', 'imapoauth');
         
         // ImapOauth2 Web Guard
         Auth::extend('imap-web', function ($app, $name, array $config) {
