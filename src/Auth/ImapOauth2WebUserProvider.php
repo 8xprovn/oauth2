@@ -35,15 +35,15 @@ class ImapOauth2WebUserProvider implements UserProvider
     public function retrieveByCredentials(array $credentials)
     {
        
-        if (
-            !array_key_exists('phone', $credentials) || 
-            !array_key_exists('contact_id', $credentials) 
-        ) {
-            return null;
-        }
+        // if (
+        //     !array_key_exists('phone', $credentials) || 
+        //     !array_key_exists('contact_id', $credentials) 
+        // ) {
+        //     return null;
+        // }
 
        
-        $credentials['user_id'] = $credentials['contact_id']; 
+       // $credentials['user_id'] = $credentials['contact_id']; 
 
         return new ImapOauth2User($credentials);
 
