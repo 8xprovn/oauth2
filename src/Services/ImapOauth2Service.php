@@ -326,11 +326,12 @@ class ImapOauth2Service
             $userProfile['user_id'] = $user['sub'];
             session()->put(self::ImapOauth2_SESSION.'user_profile_'.$user['sub'], $userProfile);
         }
+     
         return $userProfile;
     }
     public function retrieveProfile($access_token, $user) {
 
-        $profile_url = config('imapoauth.api_microservice_url').'/v1/crm/contacts/search/me';
+        $profile_url = config('imapoauth.api_gateway_url').'/crm/me/contact';
 
         $response = \Http::withToken($access_token)->get($profile_url);
        
