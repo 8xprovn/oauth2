@@ -23,7 +23,8 @@ class ImapOauth2User implements Authenticatable
         'gender',
         'phone',
         'avatar',
-        'facebook'
+        'facebook',
+        'created_time'
     ];
 
     /**
