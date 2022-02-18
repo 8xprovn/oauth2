@@ -21,7 +21,9 @@ class ImapOauth2User implements Authenticatable
         'birthdate',
         'email',
         'gender',
-        'phone'
+        'phone',
+        'avatar',
+        'facebook'
     ];
 
     /**
