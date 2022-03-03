@@ -13,13 +13,18 @@ class ImapOauth2User implements Authenticatable
      * @var array
      */
     protected $fillable = [
+        'contact_id',
         'user_id',
         'first_name',
         'last_name',
         'fullname',
         'birthdate',
         'email',
-        'phone'
+        'gender',
+        'phone',
+        'avatar',
+        'facebook',
+        'created_time'
     ];
 
     /**
