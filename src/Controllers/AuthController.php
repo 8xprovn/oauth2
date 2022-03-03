@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use ImapOauth2\Exceptions\ImapOauth2CallbackException;
 use ImapOauth2\Facades\ImapOauth2Web;
 use ImapOauth2\Facades\ImapGuard;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 
 class AuthController extends Controller
 {
@@ -18,7 +20,12 @@ class AuthController extends Controller
      */
     public function login()
     {
-        $url = ImapOauth2Web::getLoginUrl();
+       // $currentURL = URL::full();
+        $preURL = URL::previous();
+        //$state =  bin2hex(openssl_random_pseudo_bytes(4));
+        $state = Session::getId();
+        Session::put($state,$preURL);
+        $url = ImapOauth2Web::getLoginUrl($state);
         return redirect($url);
     }
 
@@ -66,23 +73,35 @@ class AuthController extends Controller
      */
     public function callback(Request $request)
     {
+      
         if (! empty($request->input('error'))) {
             $error = $request->input('error_description');
             $error = ($error) ?: $request->input('error');
 
             throw new ImapOauth2CallbackException($error);
         }
-
+        
         $code = $request->input('code');
+    
+        $state = $request->input('state');
 
-        if (! empty($code)) {
+
+        if(empty($state)) return redirect(route('ImapOauth2.logout'));
+
+        $redirectURL = Session::get($state);
+
+        if(!$redirectURL) return redirect(route('ImapOauth2.logout'));
+
+        if (!empty($code)) {
             $token = ImapOauth2Web::getAccessToken($code);
-           
-  
+           //dd(ImapGuard::validate($token));
             if (ImapGuard::validate($token)) {
-                $url = env('ROUTE_PREFIX') ?? '/';
-              
-                return redirect($url);
+                //$url = env('ROUTE_PREFIX') ?? '/';
+                //if($redirectURL) {
+                    Session::forget($state);
+                    return redirect($redirectURL);
+                //}
+                //return redirect($url);
             }
         }
 

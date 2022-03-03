@@ -126,7 +126,8 @@ class ImapOauth2WebGuard implements Guard
      */
     public function authenticate($credentials = array())
     {
-         
+       
+        //dd($credentials);
         // Get Credentials
         if (!$credentials) {
             $credentials = ImapOauth2Web::retrieveToken();    
@@ -137,7 +138,7 @@ class ImapOauth2WebGuard implements Guard
         }
        
         $user = ImapOauth2Web::getUserProfile($credentials);
-        
+
         if (empty($user)) {
             ImapOauth2Web::forgetToken();
             return false;
@@ -145,7 +146,7 @@ class ImapOauth2WebGuard implements Guard
 
         // Provide User
         $user = $this->provider->retrieveByCredentials($user);
-
+        
         $this->setUser($user);
 
         return true;

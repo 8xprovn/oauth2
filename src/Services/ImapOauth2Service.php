@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
 use ImapOauth2\Auth\Guard\ImapOauth2WebGuard;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 
 class ImapOauth2Service
 {
@@ -133,7 +135,7 @@ class ImapOauth2Service
      *
      * @return string
      */
-    public function getLoginUrl()
+    public function getLoginUrl($state = 'mystate')
     {
 
         $url = $this->baseUrl.'/oauth/authenticate/';
@@ -142,7 +144,7 @@ class ImapOauth2Service
             'grant_type'=> 'authorization_code',
             'response_type' => 'code',
             'redirect_uri' => $this->callbackUrl,
-            'state' => 'mystate'
+            'state' => $state
         ];
 
         return $this->buildUrl($url, $params);
@@ -304,6 +306,7 @@ class ImapOauth2Service
      */
     public function getUserProfile($credentials)
     {
+     
         $credentials = $this->refreshTokenIfNeeded($credentials);
         if (empty($credentials['access_token'])) {
             $this->forgetToken();
@@ -315,6 +318,7 @@ class ImapOauth2Service
         if (!$user) {
             return [];
         }
+       
         //dd(session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['sub']));
         if ($userProfile = session()->get(self::ImapOauth2_SESSION.'user_profile_'.$user['sub'])){
             return $userProfile;
@@ -322,6 +326,7 @@ class ImapOauth2Service
         
         
         $userProfile = $this->retrieveProfile($credentials['access_token'], $user);
+
         if ($userProfile) {
             $userProfile['user_id'] = $user['sub'];
             session()->put(self::ImapOauth2_SESSION.'user_profile_'.$user['sub'], $userProfile);
@@ -356,7 +361,7 @@ class ImapOauth2Service
         $public_key = config('imapoauth.jwt_public_key');  //env('ImapOauth2_JWT_PUBLIC_KEY');
         try {
             JWT::$leeway = 10;
-            return (array)JWT::decode($token, $public_key , array('RS256'));
+            return (array)JWT::decode($token, new Key($public_key, 'RS256'));
         }catch (\Exception $e) {
              return [];
         }

@@ -25,6 +25,7 @@ class ImapOauth2ServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+      
         //$this->registerPolicies();
         // User Provider
         // $this->publishes([
@@ -34,6 +35,7 @@ class ImapOauth2ServiceProvider extends ServiceProvider
             //return new ImapOauth2WebUserProvider($config['model']);
             return new ImapOauth2WebUserProvider(new ImapOauth2User([]));
         });
+    
     }
 
     /**
@@ -93,17 +95,17 @@ class ImapOauth2ServiceProvider extends ServiceProvider
         ];
         // Register Routes
         $router = $this->app->make('router');
-
+        
         if (! empty($options['login'])) {
-            $router->get($options['login'], 'ImapOauth2\Controllers\AuthController@login')->name('ImapOauth2.login');
+            $router->get($options['login'], 'ImapOauth2\Controllers\AuthController@login')->name('ImapOauth2.login')->middleware('web');
         }
 
         if (! empty($options['logout'])) {
-            $router->get($options['logout'], 'ImapOauth2\Controllers\AuthController@logout')->name('ImapOauth2.logout');
+            $router->get($options['logout'], 'ImapOauth2\Controllers\AuthController@logout')->name('ImapOauth2.logout')->middleware('web');
         }
 
         if (! empty($options['redirect_logout'])) {
-            $router->get($options['redirect_logout'], 'ImapOauth2\Controllers\AuthController@logoutRedirect')->name('ImapOauth2.redirect_logout');
+            $router->get($options['redirect_logout'], 'ImapOauth2\Controllers\AuthController@logoutRedirect')->name('ImapOauth2.redirect_logout')->middleware('web');
         }
 
         if (! empty($options['register'])) {
@@ -111,7 +113,7 @@ class ImapOauth2ServiceProvider extends ServiceProvider
         }
 
         if (! empty($options['callback'])) {
-            $router->get($options['callback'], 'ImapOauth2\Controllers\AuthController@callback')->name('ImapOauth2.callback');
+            $router->get($options['callback'], 'ImapOauth2\Controllers\AuthController@callback')->name('ImapOauth2.callback')->middleware('web');
         }
     }
 
