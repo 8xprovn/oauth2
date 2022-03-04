@@ -36,6 +36,7 @@ class AuthController extends Controller
      */
     public function logout()
     {
+       
         ImapOauth2Web::forgetToken();
 
         $url = ImapOauth2Web::getLogoutUrl();

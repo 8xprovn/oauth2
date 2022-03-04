@@ -1,6 +1,9 @@
 {
      "name": "8xprovn/imap_oauth2",
      "type": "package",
+     "require": {
+        "firebase/php-jwt": "^6.0"
+    },
      "autoload": {
          "psr-4": {
              "ImapOauth2\\": "src/"
