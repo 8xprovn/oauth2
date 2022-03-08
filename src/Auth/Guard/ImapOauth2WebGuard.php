@@ -12,7 +12,7 @@ use ImapOauth2\Facades\ImapOauth2Web;
 //use Illuminate\Contracts\Auth\UserProvider;
 use ImapOauth2\Auth\ImapOauth2WebUserProvider as UserProvider;
 
-class ImapOauth2WebGuard implements Guard
+class ImapOauth2WebGuard
 {
     /**
      * @var null|Authenticatable|ImapOauth2User

@@ -4,6 +4,8 @@ namespace ImapOauth2\Middleware;
 
 use Illuminate\Auth\Middleware\Authenticate;
 use ImapOauth2\Facades\ImapOauth2Web;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 
 class ImapOauth2Authenticated extends Authenticate
 {
@@ -15,7 +17,11 @@ class ImapOauth2Authenticated extends Authenticate
      */
     protected function redirectTo($request)
     {
-        $url = ImapOauth2Web::getLoginUrl();
+        $preURL = URL::previous();
+        //$state =  bin2hex(openssl_random_pseudo_bytes(4));
+        $state = Session::getId();
+        Session::put($state,$preURL);
+        $url = ImapOauth2Web::getLoginUrl($state);
         return $url;
         //return redirect($url);
     }
