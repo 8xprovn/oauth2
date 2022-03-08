@@ -207,10 +207,9 @@ class ImapOauth2Service
         if(!$callbackUrl) {
             $callbackUrl = $this->callbackUrl;
         }
-
-        // /dd($callbackUrl);
-
+        
         $url =  $this->baseUrl.'/oauth/token';
+
         $params = [
             'code' => $code,
             'client_id' => $this->clientId,
